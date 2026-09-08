@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alfonso Vision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A1018; --panel:#0E1622; --gold:#E8B23A;
+    --text:#E9EDF3; --muted:#8794A8; --dim:#5F6B7E; --dimmer:#3E4859;
+    --placeholder:#2C3746; --line:rgba(255,255,255,0.12); --line-dash:rgba(255,255,255,0.22);
+    --serif:'Instrument Serif',Georgia,serif;
+    --sans:'Archivo',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);
+    min-height:100vh;padding:38px 48px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto}
+
+  /* ---------- header ---------- */
+  header{display:flex;align-items:flex-start;justify-content:space-between;
+    padding-bottom:26px;border-bottom:1px solid var(--line);margin-bottom:34px}
+  .brand{display:flex;gap:16px;align-items:center}
+  .logo{width:38px;height:38px;border:2px solid var(--gold);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .logo::after{content:"";width:10px;height:10px;background:var(--gold);border-radius:50%}
+  h1{font-family:var(--serif);font-weight:400;font-size:36px;line-height:1;letter-spacing:-.36px}
+  .sub{font-size:12.5px;letter-spacing:1.75px;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .modelo{font-family:var(--mono);font-size:11px;letter-spacing:.9px;color:var(--dim);
+    text-transform:uppercase;padding-top:8px}
+
+  /* ---------- layout ---------- */
+  .grid{display:grid;grid-template-columns:1.12fr .88fr;gap:26px;align-items:stretch}
+  .seccion-label{font-size:12px;letter-spacing:1.9px;text-transform:uppercase;color:var(--muted);
+    margin-bottom:14px}
+  .seccion-label .num{color:var(--gold);margin-right:8px}
+  .mt{margin-top:30px}
+
+  /* ---------- dropzone ---------- */
+  .dropzone{position:relative;background:var(--panel);border:1.5px dashed var(--line-dash);
+    border-radius:4px;min-height:262px;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;padding:20px}
+  .dropzone:hover,.dropzone.drag{border-color:var(--gold);background:#101a28}
+  .lens{width:56px;height:56px;border:2px solid var(--gold);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+  .dz-title{font-size:17px;font-weight:600;letter-spacing:-.17px;color:var(--text)}
+  .dz-sub{font-family:var(--mono);font-size:11px;letter-spacing:.9px;color:var(--dim);
+    text-transform:uppercase;margin-top:10px}
+  #preview{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+    background:#070c12;border-radius:3px;padding:6px}
+  .cambiar{position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.8px;color:var(--dim);text-transform:uppercase;background:rgba(7,12,18,.75);
+    padding:4px 8px;border-radius:3px}
+
+  /* ---------- plantilla + categorias ---------- */
+  .plantilla-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .mini{font-family:var(--mono);font-size:11px;letter-spacing:.6px;color:var(--dim);text-transform:uppercase}
+  select#perfil{font-family:var(--mono);font-size:12px;color:var(--text);background:var(--panel);
+    border:1px solid var(--line);border-radius:3px;padding:6px 8px;cursor:pointer}
+  .mono-input{width:100%;font-family:var(--mono);font-size:14px;letter-spacing:.28px;color:var(--text);
+    background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:13px 14px;outline:none}
+  .mono-input:focus{border-color:var(--gold)}
+  .helper{font-size:12px;color:var(--dim);margin-top:9px}
+
+  /* ---------- boton ---------- */
+  .cta{width:100%;margin-top:26px;background:var(--gold);color:#1a1204;border:none;border-radius:3px;
+    font-family:var(--sans);font-size:16px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;
+    padding:16px;cursor:pointer;transition:filter .15s}
+  .cta:hover{filter:brightness(1.07)}
+  .cta:disabled{opacity:.5;cursor:default;filter:none}
+
+  /* ---------- panel veredicto ---------- */
+  .veredicto-panel{background:linear-gradient(180deg,#0d1521,#0b111b);border:1px solid var(--line);
+    border-radius:4px;padding:34px;display:flex;flex-direction:column;min-height:100%}
+  .sin{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dimmer)}
+  .dictamen{font-family:var(--serif);font-size:33px;line-height:1.25;color:var(--placeholder);margin-top:18px;max-width:15em}
+
+  .veredicto-label{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold)}
+  .veredicto-top{font-family:var(--serif);font-size:52px;line-height:1.05;color:var(--text);margin-top:14px;text-transform:capitalize}
+  .veredicto-conf{font-family:var(--mono);font-size:13px;letter-spacing:.5px;color:var(--muted);margin-top:10px}
+  .barras{margin-top:26px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:22px}
+  .barra{display:grid;grid-template-columns:1fr;gap:5px}
+  .barra .fila{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;letter-spacing:.3px}
+  .barra .fila .et{color:var(--text);text-transform:capitalize}
+  .barra .fila .pc{color:var(--muted)}
+  .track{height:6px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden}
+  .fill{height:100%;background:var(--gold);border-radius:3px;transition:width .5s ease}
+  .barra.top .fill{background:var(--gold)}
+  .barra:not(.top) .fill{background:#4a5568}
+  .error-box{font-family:var(--mono);font-size:13px;line-height:1.6;color:#ff8a8a;white-space:pre-wrap}
+
+  @media(max-width:860px){
+    body{padding:24px 20px}
+    .grid{grid-template-columns:1fr}
+    header{flex-direction:column;gap:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Alfonso Vision</h1>
+        <p class="sub">Clasificador de imágenes por visión artificial</p>
+      </div>
+    </div>
+    <div class="modelo" id="modelo">Modelo CLIP · Local</div>
+  </header>
+
+  <main class="grid">
+    <!-- Columna izquierda -->
+    <section>
+      <div class="seccion-label"><span class="num">01</span>Evidencia visual</div>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file" accept="image/*" hidden>
+        <div id="dz-content">
+          <div class="lens">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8B23A" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+            </svg>
+          </div>
+          <p class="dz-title">Arrastra tu imagen aquí o haz clic para subir</p>
+          <p class="dz-sub">JPG · PNG · WEBP — Máx. 12 MB</p>
+        </div>
+        <img id="preview" hidden alt="vista previa">
+        <span class="cambiar" id="cambiar" hidden>Clic para cambiar</span>
+      </div>
+
+      <div class="seccion-label mt"><span class="num">02</span>Categorías a comparar</div>
+      <div class="plantilla-row">
+        <span class="mini">Plantilla:</span>
+        <select id="perfil"><option value="">— manual —</option></select>
+      </div>
+      <input type="text" id="labels" class="mono-input" placeholder="perro, gato, zorro, lobo">
+      <p class="helper">Sepáralas con comas. Se evaluarán todas contra la imagen.</p>
+
+      <button class="cta" id="btn">Clasificar ahora</button>
+    </section>
+
+    <!-- Columna derecha -->
+    <section>
+      <div class="veredicto-panel">
+        <div id="placeholder">
+          <p class="sin">Sin veredicto</p>
+          <p class="dictamen">El dictamen aparecerá aquí una vez analizada la evidencia.</p>
+        </div>
+        <div id="resultado" hidden></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const dropzone=$("#dropzone"), fileInput=$("#file"), preview=$("#preview"),
+      dzContent=$("#dz-content"), cambiar=$("#cambiar"),
+      labels=$("#labels"), perfil=$("#perfil"), btn=$("#btn"),
+      placeholder=$("#placeholder"), resultado=$("#resultado");
+let imagenB64=null;
+let perfilesData=[];
+
+// --- cargar perfiles (plantillas) ---
+fetch("/clasificadores").then(r=>r.json()).then(list=>{
+  perfilesData=list;
+  for(const c of list){
+    const o=document.createElement("option");
+    o.value=c.id; o.textContent=c.nombre;
+    perfil.appendChild(o);
+  }
+}).catch(()=>{});
+
+perfil.addEventListener("change",()=>{
+  const c=perfilesData.find(x=>x.id===perfil.value);
+  if(c) labels.value=c.etiquetas;
+});
+
+// --- seleccion / arrastre de imagen ---
+dropzone.addEventListener("click",()=>fileInput.click());
+dropzone.addEventListener("dragover",e=>{e.preventDefault();dropzone.classList.add("drag");});
+dropzone.addEventListener("dragleave",()=>dropzone.classList.remove("drag"));
+dropzone.addEventListener("drop",e=>{
+  e.preventDefault();dropzone.classList.remove("drag");
+  if(e.dataTransfer.files[0]) cargarArchivo(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change",()=>{ if(fileInput.files[0]) cargarArchivo(fileInput.files[0]); });
+
+function cargarArchivo(f){
+  if(!f.type.startsWith("image/")){ alerta("El archivo no es una imagen."); return; }
+  if(f.size>12*1024*1024){ alerta("La imagen supera los 12 MB."); return; }
+  const rd=new FileReader();
+  rd.onload=e=>{
+    imagenB64=e.target.result;
+    preview.src=imagenB64; preview.hidden=false;
+    dzContent.hidden=true; cambiar.hidden=false;
+  };
+  rd.readAsDataURL(f);
+}
+
+// --- clasificar ---
+btn.addEventListener("click",async()=>{
+  if(!imagenB64){ alerta("Primero elige una imagen."); return; }
+  const etq=labels.value.trim();
+  if(!etq){ alerta("Escribe al menos una categoría."); return; }
+
+  btn.disabled=true; btn.textContent="Analizando evidencia…";
+  mostrarProcesando();
+
+  try{
+    const r=await fetch("/clasificar",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({image:imagenB64,labels:etq})
+    });
+    const data=await r.json();
+    if(!r.ok||data.error) throw new Error(data.error||"Error del servidor.");
+    render(data.resultados);
+  }catch(err){
+    alerta(err.message);
+  }finally{
+    btn.disabled=false; btn.textContent="Clasificar ahora";
+  }
+});
+
+function mostrarProcesando(){
+  placeholder.hidden=true; resultado.hidden=false;
+  resultado.innerHTML=`<p class="veredicto-label">Analizando</p>
+    <p class="dictamen" style="font-size:28px">Procesando la evidencia…</p>`;
+}
+
+function render(res){
+  placeholder.hidden=true; resultado.hidden=false;
+  const top=res[0];
+  const filas=res.slice(0,10).map((x,i)=>{
+    const pct=(x.prob*100);
+    return `<div class="barra ${i===0?'top':''}">
+      <div class="fila"><span class="et">${escapar(x.etiqueta)}</span><span class="pc">${pct.toFixed(1)}%</span></div>
+      <div class="track"><div class="fill" style="width:${pct.toFixed(1)}%"></div></div>
+    </div>`;
+  }).join("");
+  resultado.innerHTML=`
+    <p class="veredicto-label">Veredicto</p>
+    <h2 class="veredicto-top">${escapar(top.etiqueta)}</h2>
+    <p class="veredicto-conf">${(top.prob*100).toFixed(1)}% de confianza</p>
+    <div class="barras">${filas}</div>`;
+}
+
+function alerta(msg){
+  placeholder.hidden=true; resultado.hidden=false;
+  resultado.innerHTML=`<p class="veredicto-label" style="color:#ff8a8a">Aviso</p>
+    <div class="error-box" style="margin-top:14px">${escapar(msg)}</div>`;
+}
+function escapar(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+</script>
+</body>
+</html>

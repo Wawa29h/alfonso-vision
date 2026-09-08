@@ -1,0 +1,8 @@
+# Dependencias del clasificador Alfonso Vision.
+# Instalar dentro de un entorno virtual:
+#   python -m venv alfonso
+#   alfonso\Scripts\activate      (Windows)
+#   pip install -r requirements.txt
+torch
+transformers
+pillow

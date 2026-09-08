@@ -1,0 +1,20 @@
+# Entorno virtual (se recrea con: python -m venv alfonso && pip install -r requirements.txt)
+alfonso/
+.venv/
+venv/
+
+# Cache de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Modelos / pesos descargados (se bajan solos desde Hugging Face al primer uso)
+*.safetensors
+*.bin
+.cache/
+
+# Sistema operativo / editores
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
