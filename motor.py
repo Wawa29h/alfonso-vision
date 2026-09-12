@@ -21,6 +21,55 @@ class ErrorModelo(RuntimeError):
 # Cache de modelos ya cargados: {nombre_modelo: (model, processor, device)}
 _CACHE: dict[str, tuple] = {}
 
+_ETIQUETAS_CLIP = {
+    "un perro": "a dog", "un gato": "a cat", "un caballo": "a horse",
+    "una vaca": "a cow", "una oveja": "a sheep", "un cerdo": "a pig",
+    "una gallina": "a chicken", "un pato": "a duck", "un conejo": "a rabbit",
+    "un raton": "a mouse", "un leon": "a lion", "un tigre": "a tiger",
+    "un oso": "a bear", "un elefante": "an elephant", "una jirafa": "a giraffe",
+    "un mono": "a monkey", "un venado": "a deer", "un lobo": "a wolf",
+    "un zorro": "a fox", "una cebra": "a zebra", "un aguila": "an eagle",
+    "un buho": "an owl", "un loro": "a parrot", "una paloma": "a pigeon",
+    "una serpiente": "a snake", "una tortuga": "a turtle", "una rana": "a frog",
+    "un lagarto": "a lizard", "un pez": "a fish", "un tiburon": "a shark",
+    "un delfin": "a dolphin", "una ballena": "a whale", "una mariposa": "a butterfly",
+    "una abeja": "a bee", "una arana": "a spider", "un cangrejo": "a crab",
+    "un mapache": "a raccoon", "una llama": "a llama", "un leopardo": "a leopard",
+    "un hipopotamo": "a hippopotamus", "un rinoceronte": "a rhinoceros",
+    "un cocodrilo": "a crocodile", "un pinguino": "a penguin",
+    "un flamenco": "a flamingo", "un avestruz": "an ostrich",
+    "un murcielago": "a bat", "una ardilla": "a squirrel",
+    "una nutria": "an otter", "un koala": "a koala", "un panda": "a panda",
+    "un canguro": "a kangaroo", "un gorila": "a gorilla",
+    "un chimpance": "a chimpanzee", "una foca": "a seal",
+    "un pulpo": "an octopus", "una medusa": "a jellyfish",
+    "una langosta": "a lobster", "un caracol": "a snail",
+}
+
+_DESCRIPCIONES_CLAVE = {
+    "un mapache": "a masked mammal with a ringed tail",
+    "un raton": "a tiny rodent with round ears and a thin tail",
+    "un oso": "a large robust mammal with powerful paws",
+    "un zorro": "a fox-like mammal with a pointed muzzle and bushy tail",
+    "un lobo": "a large wild canine with a long muzzle and pointed ears",
+    "un leopardo": "a large spotted muscular cat",
+    "un tigre": "a large cat with dark stripes",
+    "una llama": "a South American animal with a long neck and wool",
+}
+
+_VARIANTES_PROMPT = {
+    "un mapache": [
+        "a photo of a raccoon",
+        "a close-up photo of a raccoon",
+        "a raccoon with a black facial mask and ringed tail",
+    ],
+    "un raton": [
+        "a photo of a mouse",
+        "a close-up photo of a mouse",
+        "a small mouse with round ears and a thin tail",
+    ],
+}
+
 
 def _importar_torch():
     """Importa torch/transformers y traduce fallos comunes a ErrorModelo."""
@@ -85,7 +134,15 @@ def clasificar(imagen, clasificador: Clasificador, log=print):
         image = Image.open(imagen).convert("RGB")
     else:
         image = imagen.convert("RGB")   # ya es una imagen PIL
-    prompts = [clasificador.plantilla.format(label=etq) for etq in clasificador.etiquetas]
+    grupos_prompts = []
+    for etq in clasificador.etiquetas:
+        etiqueta_clip = _ETIQUETAS_CLIP.get(etq)
+        prompt = f"a photo of {etiqueta_clip}" if etiqueta_clip else clasificador.plantilla.format(label=etq)
+        descripcion = _DESCRIPCIONES_CLAVE.get(etq)
+        if descripcion:
+            prompt += f", {descripcion}"
+        grupos_prompts.append(_VARIANTES_PROMPT.get(etq, [prompt]))
+    prompts = [prompt for grupo in grupos_prompts for prompt in grupo]
 
     inputs = processor(text=prompts, images=image, return_tensors="pt", padding=True).to(device)
     if device == "cuda":
@@ -93,6 +150,13 @@ def clasificar(imagen, clasificador: Clasificador, log=print):
 
     with torch.no_grad():
         outputs = model(**inputs)
-        probs = outputs.logits_per_image.softmax(dim=1).cpu().numpy()[0]
+        logits = outputs.logits_per_image[0]
+        scores = []
+        cursor = 0
+        for grupo in grupos_prompts:
+            cantidad = len(grupo)
+            scores.append(logits[cursor:cursor + cantidad].mean())
+            cursor += cantidad
+        probs = torch.stack(scores).softmax(dim=0).cpu().numpy()
 
     return sorted(zip(clasificador.etiquetas, probs), key=lambda x: x[1], reverse=True)

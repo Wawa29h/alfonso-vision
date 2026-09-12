@@ -61,6 +61,14 @@ CLASIFICADORES: dict[str, Clasificador] = {
             "un pez", "un tiburon", "un delfin", "una ballena",
             # insectos / otros
             "una mariposa", "una abeja", "una arana", "un cangrejo",
+            "una llama", "un leopardo",
+            # mas mamiferos y animales salvajes
+            "un mapache", "un hipopotamo", "un rinoceronte", "un cocodrilo", "un pinguino",
+            "un flamenco", "un avestruz", "un murcielago", "una ardilla",
+            "una nutria", "un koala", "un panda", "un canguro",
+            "un gorila", "un chimpance", "una foca",
+            # animales marinos y pequenos
+            "un pulpo", "una medusa", "una langosta", "un caracol",
         ],
     ),
     "frutas": Clasificador(
